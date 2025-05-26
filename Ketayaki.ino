@@ -1,8 +1,8 @@
-int Pin_thermistor = 26;
+int Pin_thermistor = 26; 
 int Pin_Peltier = 22;
 float celsius = 1;
 float smoothed_celsius = 15.0; //平滑化後の温度 ←直温度取得1回目の値で初期化した方がいいか？
-int duty = 0; //デューティー比
+int duty = 0; //デューティー比 
 float PWM_OUT_V; //PWM制御による平均出力電圧
 int i;
 int under_temp_V , over_temp_V = 0; //Voltageのtemp_V配列内近似値　温度低い方 = under_temp_V, 温度高い方 = over_temp_V，最近似値 = neaest_temp_V

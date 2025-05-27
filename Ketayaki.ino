@@ -1,5 +1,5 @@
-int Pin_thermistor = 26; 
-int Pin_Peltier = 22;
+const int Pin_thermistor = 26; 
+const int Pin_Peltier = 22;
 float celsius = 1;
 float smoothed_celsius = 15.0; //平滑化後の温度 ←直温度取得1回目の値で初期化した方がいいか？
 int duty = 0; //デューティー比 
@@ -10,6 +10,11 @@ int Voltage;
 int num_temp_V = 0;
 int Pin_thermistor_num = 0;
 
+int left = 0;
+int right = 1350; // 要素数-1
+int mid;
+
+/*
 //↓PID用
 const float P =2; //Pゲイン
 const float I =9; //Iゲイン
@@ -22,16 +27,16 @@ float I_diff_temp = 0.0; //I要素（積分）
 float D_diff_temp = 0.0; //D要素（微分）
 float u = 0.0; //PIDからの出力[%]
 //↑
-
+*/
 //↓7seg用
-int tDelay = 2;   // 遅延設定
-int rclkPin = 14;   // (11) ST_CP [RCLK] on 74HC595
-int srclkPin = 15;   // (9)  SH_CP [SRCLK] on 74HC595
-int dsPin = 13;     // (12) DS [SER] on 74HC595
-int dig1 = 1;       // DIG1を1番ピンに割り当て
-int dig2 = 2;       // DIG2を2番ピンに割り当て
-int dig3 = 3;       // DIG3を3番ピンに割り当て
-int dig4 = 4;       // DIG4を4番ピンに割り当て
+const int tDelay = 2;   // 遅延設定
+const int rclkPin = 14;   // (11) ST_CP [RCLK] on 74HC595
+const int srclkPin = 15;   // (9)  SH_CP [SRCLK] on 74HC595
+const int dsPin = 13;     // (12) DS [SER] on 74HC595
+const int dig1 = 1;       // DIG1を1番ピンに割り当て
+const int dig2 = 2;       // DIG2を2番ピンに割り当て
+const int dig3 = 3;       // DIG3を3番ピンに割り当て
+const int dig4 = 4;       // DIG4を4番ピンに割り当て
 // 1 = LED OFF, 0 = LED ON
 byte seven_leds[13] = {
   0b00000011,  // → 0
@@ -78,6 +83,34 @@ float get_celsius(int Pin_thermistor_num){
   //Serial.print(Voltage);
   //Serial.print(", ");
 
+  
+  //二分探索法
+  while (left <= right) {
+    mid = (left + right) / 2;
+
+    if (temp_V[mid] > Voltage) {
+        left = mid + 1;
+    } 
+    else {
+        right = mid - 1;
+    }
+  }
+  
+  under_temp_V = temp_V[left];
+  over_temp_V = temp_V[left + 1];
+  // left: Voltage以下となる最小インデックス
+  // 候補は temp_V[left - 1]（大きい側）と temp_V[left]（小さい側）
+  if (left == 0) {
+    num_temp_V = 0; // すべての値よりVoltageが大きい（超高温）
+  } else if (left >= 1351) {
+    num_temp_V = 1350; // すべての値よりVoltageが小さい（超低温）
+  } else {
+    int diff_under = abs(temp_V[left] - Voltage);
+    int diff_over = abs(temp_V[left + 1] - Voltage);
+    num_temp_V = (diff_under < diff_over) ? left : (left + 1);
+  }
+  
+  /*
   //前から配列を検索してunder_temp,over_temp決定
   for(i = 0; i < 1351; i++){
     if(temp_V[i] <= Voltage){
@@ -86,6 +119,7 @@ float get_celsius(int Pin_thermistor_num){
   }
   under_temp_V = temp_V[i--];
   over_temp_V = temp_V[i];
+  
 
   //最近似値に相当する配列の番号を決定
   if((under_temp_V - Voltage) > (Voltage - over_temp_V)){
@@ -94,6 +128,7 @@ float get_celsius(int Pin_thermistor_num){
   else{
     num_temp_V = i;
   }
+  */
 
   //平滑化していない温度をリターン
   
@@ -221,20 +256,22 @@ void funcShiftReg_dig3(char x){
 
 
 //ディスプレイ出力
-void LED(String smoothed_celsius) {
+char LED(String smoothed_celsius) {
   int len = smoothed_celsius.length();
+  //Serial.print(len);
   if(len == 5){      //e.g. 75.34
     out_LED[0] = 'N';//null 1桁目表示OFF
-    //out_LED[i]に1文字ずつ格納(小数第2位を読み込まないように4回のループにする) char
-    for (m = 1; m < 5; m++) {
-      out_LED[m] = smoothed_celsius.charAt(m);
-    }
+    out_LED[1] = smoothed_celsius.charAt(0);
+    out_LED[2] = smoothed_celsius.charAt(1);
+    out_LED[3] = smoothed_celsius.charAt(3);
+    out_LED[4] = smoothed_celsius.charAt(4);
   }
-  if(len == 6){      //e.g. 123.34
-    //out_LED[i]に1文字ずつ格納(小数第2位を読み込まないように5回のループにする)
-    for (m = 0; m < 5; m++) {
-      out_LED[m] = smoothed_celsius.charAt(m);
-    }
+  else if(len == 6){      //e.g. 123.34
+    out_LED[0] = smoothed_celsius.charAt(0);
+    out_LED[1] = smoothed_celsius.charAt(1);
+    out_LED[2] = smoothed_celsius.charAt(2);
+    out_LED[3] = smoothed_celsius.charAt(4);
+    out_LED[4] = smoothed_celsius.charAt(5);
   }
   else{
     for (m = 0; m < 5; m++) {
@@ -242,11 +279,13 @@ void LED(String smoothed_celsius) {
     }
   }
   // 配列に格納された文字をシリアルモニタに表示
-  for (int i = 0; i < 5; i++) {
-    Serial.print(out_LED[i]);
-    Serial.println(", ");
-  }
-  //return out_LED[m];
+  //for (int i = 0; i < 5; i++) {
+  //  Serial.print(out_LED[i]);
+  //  Serial.print(", ");
+  //}
+  
+  
+  return out_LED[m];
 }
 
 
@@ -261,12 +300,15 @@ void setup() {
 
 void loop() {
   
-  //Pin_thermistor_num = Pin_thermistor; //温度を読みたいサーミスタのピン番号を代入
-  //celsius = get_celsius(Pin_thermistor_num);
-  //smoothed_celsius = get_smoothed_celsius(celsius, smoothed_celsius);
+  Pin_thermistor_num = Pin_thermistor; //温度を読みたいサーミスタのピン番号を代入
+  celsius = get_celsius(Pin_thermistor_num);
+  smoothed_celsius = get_smoothed_celsius(celsius, smoothed_celsius);
   
   //PWM_OUT_V = get_PWM_OUT_V(smoothed_celsius);
-
+  for (int i = 0; i < 5; i++) {
+    Serial.print(out_LED[i]);
+    Serial.print(", ");
+  }
   //Serial.print("直温度:");
   //Serial.println(celsius);
   //Serial.print(", ");
@@ -308,7 +350,8 @@ void loop() {
   */
 
   
-  delay(10000);
+
+  delay(1000);
   
 }
 
@@ -330,14 +373,15 @@ void setup1(){
   digitalWrite(dig3, LOW);    //3番ピンをHIGH DI3 OFF
   digitalWrite(dig4, LOW);    //4番ピンをHIGH DI4 OFF
   funcShiftReg('N');           //信号初期化
+  pinMode(25, OUTPUT);
   
 }
 
 void loop1(){
 
-  /*
+  
   LED((String)smoothed_celsius);
-  */
+  
 
   //DIG1の表示
   delay(tDelay);
@@ -350,7 +394,7 @@ void loop1(){
   delay(tDelay);
   funcShiftReg('N');
   
-  
+
   //DIG2の表示
   delay(tDelay);
   digitalWrite(dig1, LOW); 
@@ -380,7 +424,7 @@ void loop1(){
   digitalWrite(dig3, LOW);
   digitalWrite(dig4, HIGH);
   //DIG4を表示
-  funcShiftReg(out_LED[4]);
+  funcShiftReg(out_LED[3]);
   delay(tDelay);
   funcShiftReg('N');
   

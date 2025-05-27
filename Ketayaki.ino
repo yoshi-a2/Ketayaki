@@ -1,3 +1,8 @@
+#include <LiquidCrystal_I2C.h>
+
+#include "ketayakiServer.h"
+ketayakiServer myServer;
+
 const int Pin_thermistor = 26; 
 const int Pin_Peltier = 22;
 float celsius = 1;
@@ -46,9 +51,9 @@ byte seven_leds[13] = {
   0b10011001,  // → 4
   0b01001001,  // → 5
   0b01000001,  // → 6
-  0b00011111,  // → 7
+  0b00011011,  // → 7
   0b00000001,  // → 8
-  0b00011001,  // → 9
+  0b00001001,  // → 9
   0b11111110,  // → D.P(10)
   0b11111101,  // → -(11)
   0b11111111   // → OFF(12)
@@ -61,9 +66,9 @@ byte seven_leds_dig3[13] = {
   0b10011000,  // → 4
   0b01001000,  // → 5
   0b01000000,  // → 6
-  0b00011110,  // → 7
+  0b00011010,  // → 7
   0b00000000,  // → 8
-  0b00011000,  // → 9
+  0b00001000,  // → 9
   0b11111110,  // → D.P(10)
   0b11111100,  // → -(11)
   0b11111111   // → OFF(12)
@@ -83,7 +88,7 @@ float get_celsius(int Pin_thermistor_num){
   //Serial.print(Voltage);
   //Serial.print(", ");
 
-  
+  /*
   //二分探索法
   while (left <= right) {
     mid = (left + right) / 2;
@@ -109,8 +114,8 @@ float get_celsius(int Pin_thermistor_num){
     int diff_over = abs(temp_V[left + 1] - Voltage);
     num_temp_V = (diff_under < diff_over) ? left : (left + 1);
   }
+  */
   
-  /*
   //前から配列を検索してunder_temp,over_temp決定
   for(i = 0; i < 1351; i++){
     if(temp_V[i] <= Voltage){
@@ -119,16 +124,14 @@ float get_celsius(int Pin_thermistor_num){
   }
   under_temp_V = temp_V[i--];
   over_temp_V = temp_V[i];
-  
-
   //最近似値に相当する配列の番号を決定
   if((under_temp_V - Voltage) > (Voltage - over_temp_V)){
-    num_temp_V = i++;
-  }
-  else{
     num_temp_V = i;
   }
-  */
+  else{
+    num_temp_V = i--;
+  }
+  
 
   //平滑化していない温度をリターン
   
@@ -295,11 +298,13 @@ void setup() {
   pinMode(Pin_thermistor, INPUT);
   pinMode(Pin_Peltier, OUTPUT);
   pinMode(25,OUTPUT);
+  myServer.setup();
 }
 
 
 void loop() {
-  
+  myServer.loop();
+
   Pin_thermistor_num = Pin_thermistor; //温度を読みたいサーミスタのピン番号を代入
   celsius = get_celsius(Pin_thermistor_num);
   smoothed_celsius = get_smoothed_celsius(celsius, smoothed_celsius);
@@ -352,15 +357,29 @@ void loop() {
   
 
   delay(1000);
-  
 }
+
+
+
+
+#define SIO_PIN 0
+#define SC_PIN 1
+#define CS1_PIN 2
+#define CS2_PIN 3
+#define CS3_PIN 4
+
+
+#include <QuickStats.h>
+QuickStats stats;
+
+#define SSR 28
 
 
 
 
 //Core2つ目
 void setup1(){
-  
+  /*
   pinMode(rclkPin, OUTPUT);   //11番ピンをOUTPUTとして定義
   pinMode(dsPin, OUTPUT);     //12番ピンをOUTPUTとして定義
   pinMode(srclkPin, OUTPUT);  //9番ピンをOUTPUTとして定義
@@ -374,12 +393,70 @@ void setup1(){
   digitalWrite(dig4, LOW);    //4番ピンをHIGH DI4 OFF
   funcShiftReg('N');           //信号初期化
   pinMode(25, OUTPUT);
+  pinMode(LED_BUILTIN, OUTPUT);
+  Serial.begin(115200);
+  */
+
+
+  pinMode(SSR, OUTPUT);
   
+  digitalWrite(LED_BUILTIN, HIGH);
+  delay(100);
 }
 
 void loop1(){
 
-  
+  static uint32_t last_loop = 0;
+  static uint32_t run_time = 0;
+  uint32_t now = millis();
+  if (myServer.mode != 0 && now - last_loop >= 1000) { // 経過時間を取得（秒単位）
+    last_loop = now;
+    run_time++;
+  }
+
+
+
+  // あつきへ
+  // ここでmyServer.modeで戻ってくる値をcase分岐してるよ～
+  // よく見たらWebServerはこれで完結してたから
+  // ここの処理書いてくれれば一応動くよ( ´∀｀ )
+  //
+  switch (myServer.mode) {
+    case 1: // サーモスタットモード（設定温度を維持）
+      Serial.print(".");
+      digitalWrite(SSR, HIGH);
+      break;
+    case 2: // 定速加熱モード（一定の速度[できれば1分1℃]で加熱）
+      Serial.print("..");
+      digitalWrite(SSR, HIGH);
+      break;
+    default: // その他の値（例えば"0"）ならスタンバイモード（何もしない）
+      digitalWrite(SSR, LOW);
+      break;
+  }
+  float current_temp = smoothed_celsius;
+  Serial.print("[");
+  Serial.print(run_time);
+  Serial.print(",");
+  Serial.print(myServer.mode);
+  Serial.print(",");
+  Serial.print(current_temp, 1);
+  Serial.print(",");
+  Serial.print(myServer.target_temp);
+  Serial.println("]");
+  sprintf(myServer.ketayaki_status, "%d,%d,%.1f,%d", run_time, myServer.mode, current_temp, myServer.target_temp);
+  // ↑↑↑
+  // 多分「え？」ってなると思うから書いておくけど，
+  // "myServer.ketayaki_status"は"ketayakiServer.h"内で定義されてる長さ[32]のchar配列
+  // こいつをそのまま書き換えればWebサイト上での値も書き換わるよ
+  // なんて簡単♪
+  // でもコードの可読性は終わってる♪
+  delay(100);
+
+
+
+
+  /*
   LED((String)smoothed_celsius);
   
 
@@ -427,6 +504,7 @@ void loop1(){
   funcShiftReg(out_LED[3]);
   delay(tDelay);
   funcShiftReg('N');
-  
+  */
+
 }
 

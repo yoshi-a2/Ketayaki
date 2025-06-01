@@ -18,7 +18,8 @@
 ### <サイト>
 - https://tamanegi-digick.com/it/ili9341/ ←こいつを見ればすべてが分かる
   - arduino環境
-  - 画面表示，タッチ，SD  
+  - 画面表示，タッチパネル，SD  
 
 - https://qiita.com/hcuymitoh/items/a7a0ae1a8b61478eac9d
+  - arduino環境
   - タッチパネル特化型

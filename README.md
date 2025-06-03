@@ -2,20 +2,20 @@
 桁焼き用のプログラムやアイデアをメモしておく場所
 
 
-## タッチパネル & SDカードスロット付ディスプレイ　[ILI9341](https://akizukidenshi.com/catalog/g/g116265/)
-### <ライブラリ>
-#### グラフィック
+# タッチパネル & SDカードスロット付ディスプレイ　[ILI9341](https://akizukidenshi.com/catalog/g/g116265/)
+## <ライブラリ>
+### グラフィック
 - https://github.com/adafruit/Adafruit-GFX-Library
 - https://github.com/adafruit/Adafruit_ILI9341
   
-#### タッチパネル
+### タッチパネル
 - https://github.com/PaulStoffregen/XPT2046_Touchscreen
 
-#### jpeg表示
+### jpeg表示
 - https://github.com/Bodmer/TJpg_Decoder
 
 
-### <サイト>
+## <サイト>
 - https://tamanegi-digick.com/it/ili9341/ ←こいつを見ればすべてが分かる
   - arduino環境
   - 画面表示，タッチパネル，SD  
@@ -23,26 +23,49 @@
 - https://qiita.com/hcuymitoh/items/a7a0ae1a8b61478eac9d
   - arduino環境
   - タッチパネル特化型
- 
-### コマンド達
-#### 色  
-Adafruit_ILI9341.h　L106~  
-#define ILI9341_BLACK 0x0000       ///<   0,   0,   0
-#define ILI9341_NAVY 0x000F        ///<   0,   0, 123
-#define ILI9341_DARKGREEN 0x03E0   ///<   0, 125,   0
-#define ILI9341_DARKCYAN 0x03EF    ///<   0, 125, 123
-#define ILI9341_MAROON 0x7800      ///< 123,   0,   0
-#define ILI9341_PURPLE 0x780F      ///< 123,   0, 123
-#define ILI9341_OLIVE 0x7BE0       ///< 123, 125,   0
-#define ILI9341_LIGHTGREY 0xC618   ///< 198, 195, 198
-#define ILI9341_DARKGREY 0x7BEF    ///< 123, 125, 123
-#define ILI9341_BLUE 0x001F        ///<   0,   0, 255
-#define ILI9341_GREEN 0x07E0       ///<   0, 255,   0
-#define ILI9341_CYAN 0x07FF        ///<   0, 255, 255
-#define ILI9341_RED 0xF800         ///< 255,   0,   0
-#define ILI9341_MAGENTA 0xF81F     ///< 255,   0, 255
-#define ILI9341_YELLOW 0xFFE0      ///< 255, 255,   0
-#define ILI9341_WHITE 0xFFFF       ///< 255, 255, 255
-#define ILI9341_ORANGE 0xFD20      ///< 255, 165,   0
-#define ILI9341_GREENYELLOW 0xAFE5 ///< 173, 255,  41
-#define ILI9341_PINK 0xFC18        ///< 255, 130, 198
+  
+## **リファレンス**
+### 文字の表示
+tft.printf("文字\n");  
+現状，アルファベットと数字，多少の記号しか表示できない
+
+### 色  
+tft.setTextColor(ILI9341_カラー名);
+- 定義場所：Adafruit_ILI9341.h　L106~
+- デフォのカラバリ
+  - BLACK
+  - NAVY
+  - DARKGREEN
+  - DARKCYAN
+  - MAROON
+  - PURPLE
+  - OLIVE
+  - LIGHTGREY
+  - DARKGREY
+  - BLUE
+  - GREEN
+  - CYAN
+  - RED
+  - MAGENTA
+  - YELLOW
+  - WHITE
+  - ORANGE
+  - GREENYELLOW
+  - PINK
+
+### 背景色
+tft.fillScreen(ILI9341_カラー名);
+
+### 字体
+#include ".hあり字体名";  
+tft.setFont(.hなし字体名);
+
+### テキストサイズ
+tft.setTextSize(1~?の数字);
+
+### カーソル
+tft.setCursor(xドット数, yドット数);  
+xは0～340, yは0～240までの値　　  
+横文字列の先頭文字の位置を指定するコード
+
+

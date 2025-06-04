@@ -5,7 +5,7 @@
 # タッチパネル & SDカードスロット付ディスプレイ　[ILI9341](https://akizukidenshi.com/catalog/g/g116265/)
 ## <ライブラリ>
 ### グラフィック
-- https://github.com/adafruit/Adafruit-GFX-Library
+- https://github.com/adafruit/Adafruit-GFX-Library (https://github.com/adafruit/Adafruit_BusIO ←Adafruit-GFXを動かすのに必要，#includeはしなくていい，liblaryに既に入っていればダウンロードしなくていい)
 - https://github.com/adafruit/Adafruit_ILI9341
   
 ### タッチパネル

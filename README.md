@@ -23,6 +23,9 @@
 - https://qiita.com/hcuymitoh/items/a7a0ae1a8b61478eac9d
   - arduino環境
   - タッチパネル特化型
+ 
+- https://logikara.blog/pico-ili9341/
+  - やさしい
   
 ## **リファレンス**
 ### 文字の表示
@@ -66,6 +69,9 @@ tft.setTextSize(1~?の数字);
 ### カーソル
 tft.setCursor(xドット数, yドット数);  
 xは0～340, yは0～240までの値　　  
-横文字列の先頭文字の位置を指定するコード
+横文字列の先頭文字の位置を指定できる．  
+指定しない場合，(0, 0)から表示される．  
+
+### 図形
 
 

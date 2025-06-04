@@ -16,7 +16,7 @@
 
 
 ## <サイト>
-- https://tamanegi-digick.com/it/ili9341/ ←こいつを見ればすべてが分かる
+- https://tamanegi-digick.com/it/ili9341/  ←こいつを見ればすべてが分かる
   - arduino環境
   - 画面表示，タッチパネル，SD  
 
@@ -24,7 +24,7 @@
   - arduino環境
   - タッチパネル特化型
  
-- https://logikara.blog/pico-ili9341/←こいつもなかなかいい
+- https://logikara.blog/pico-ili9341/ ←こいつもなかなかいい
   - やさしい
   
 ## **リファレンス**

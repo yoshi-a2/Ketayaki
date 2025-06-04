@@ -60,8 +60,8 @@ tft.setTextColor(ILI9341_カラー名);
 tft.fillScreen(ILI9341_カラー名);
 
 ### 字体
-#include ".hあり字体名";  
-tft.setFont(.hなし字体名);
+#include "Fonts/字体名.h";  
+tft.setFont(字体名 ~~.h~~ );
 
 ### テキストサイズ
 tft.setTextSize(1~?の数字);
@@ -72,6 +72,17 @@ xは0～340, yは0～240までの値　　
 横文字列の先頭文字の位置を指定できる．  
 指定しない場合，(0, 0)から表示される．  
 
-### 図形
+### 一括表示
+上で説明したのはtft.だが，これでは「背景表示 → 文字表示」のように順番に表示され，loopすると画面のちらつきが生じる．それを防ぐためにcanvasを使用する．canvasを使用することで一括表示できるようになり，背景と文字が同時に表示されるため，ちらつきが生じない．  
+GFXcanvas16 canvas(TFT_WIDTH, TFT_HEIGHT);//setupの前で定義  
+//ここからloop  
+canvas.fillScreen(カラー名);  
+canvas.setCarsor();  
+・  
+・  
+・  
+tft.drawRGBBitmap(0, 0, canvas.getBuffer(), TFT_WIDTH, TFT_HEIGHT);
+
+
 
 

@@ -24,7 +24,7 @@
   - arduino環境
   - タッチパネル特化型
  
-- https://logikara.blog/pico-ili9341/
+- https://logikara.blog/pico-ili9341/←こいつもなかなかいい
   - やさしい
   
 ## **リファレンス**

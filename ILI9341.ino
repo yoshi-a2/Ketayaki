@@ -127,19 +127,16 @@ int page_2(){
 
     // ボタンタッチエリア検出
     if (x >= 25 && x <= 165 && y >= 80 && y <= 180){
-      tone(0,3000,100);
+      tone(2,3000,100);
       page = 3;
     }    // 範囲内ならmanualに
     if (x >= 170 && x <= 310 && y >= 80 && y <= 180){
-      tone(0,3000,100);
+      tone(2,3000,100);
       page = 4;
     } // 範囲内ならautoに
 
   }
-  else{
-    page_2();
-  }
-  
+
   return page;
 }
 
@@ -186,20 +183,17 @@ int page_3(){
     // ボタンタッチエリア検出
     if (x >= 25 && x <= 165 && y >= 102 && y <= 187){
       lampSignal = true;   // 範囲内ならランプ状態を点灯へ
-      tone(0,3000,100);
+      tone(2,3000,100);
     }
     if (x >= 170 && x <= 310 && y >= 102 && y <= 187) {
       lampSignal = false; // 範囲内ならランプ状態を消灯へ
-      tone(0,3000,100);
+      tone(2,3000,100);
     }
     if (x >= 60 && x <= 260 && y >= 188 && y <= 233){
       page = 2; // 範囲内ならpage2へ
-      tone(0,3000,100);
+      tone(2,3000,100);
     }
 
-  }
-  else{
-    page_3();
   }
 
   return page;
@@ -255,17 +249,14 @@ int page_4(){
     // ボタンタッチエリア検出
     if (x >= 25 && x <= 165 && y >= 170 && y <= 225){
       page = 6;   // 範囲内ならpage6
-      tone(0,3000,100);
+      tone(2,3000,100);
     }
     if (x >= 170 && x <= 310 && y >= 170 && y <= 225){
       page = 2; // 範囲内ならpage2
-      tone(0,3000,100);
+      tone(2,3000,100);
     }
  
 
-  }
-  else{
-    page_4();
   }
 
   return page;
@@ -320,18 +311,16 @@ int page_6(){
 
     // ボタンタッチエリア検出
     if (x >= 25 && x <= 165 && y >= 120 && y <= 205){
-      tone(0,3000,100);
+      tone(2,3000,100);
       page = 7;   // 範囲内ならpage7
     }
     if (x >= 170 && x <= 310 && y >= 120 && y <= 205){
       page = 4; // 範囲内ならpage4
-      tone(0,3000,100);
+      tone(2,3000,100);
     }
 
   }
-  else{
-    page_6();
-  }
+
   
   return page;
 }
@@ -346,36 +335,38 @@ int page_7(){
   drawText(8, 130, "Phase:", &FreeSans18pt7b, ILI9341_WHITE);
 
   time_now = millis();
-
+  
   time_start_to_now = time_now - time_start;
   /*
-  if((time_start_to_now % 1000) == 0) {
-    second = time_start_to_now / 1000;
-    minute = second / 60;
-    hour = minute / 60;
-
-    canvas.setFont(&FreeSans9pt7b);  // フォント指定
-    canvas.setCursor(50, 155);          // 表示座標指定
-    canvas.print(hour);    // 経過時間をms単位で表示
-    canvas.print(":");    // 経過時間をms単位で表示
-    canvas.print(minute);    // 経過時間をms単位で表示
-    canvas.print("'");
-    canvas.print(second);    // 経過時間をms単位で表示
-  }
-  */
   canvas.setFont(&FreeSans9pt7b);  // フォント指定
-  canvas.setCursor(50, 155);          // 表示座標指定
-  canvas.print(time_start_to_now);    // 経過時間をms単位で表示
+  canvas.setCursor(3, 155);          // 表示座標指定
+  canvas.print(time_start_to_now);
+  */
+  
+  hour = time_start_to_now / 3600000;
+  minute = (time_start_to_now / 60000) - hour*60;
+  second = (time_start_to_now / 1000) - hour*60 - minute*60;
+
+
+  canvas.setFont(&FreeSans9pt7b);  // フォント指定
+  canvas.setCursor(3, 155);          // 表示座標指定
+  canvas.print(hour);    // 
+  canvas.print(" : ");
+  canvas.print(minute);    // 
+  canvas.print(" ' ");
+  canvas.print(second);    // 
+  
 
   
   if(0 <= time_start_to_now <= 3600000){
-    drawText(150, 130, "Heat it up to 90digC", &FreeSans12pt7b, ILI9341_WHITE);
+    drawText(120, 130, "Heat it up to 90", &FreeSans12pt7b, ILI9341_WHITE);
   }
+  /*
   if(3600000 < time_start_to_now <= 25200000){
     drawText(150, 130, "Keep 90digC", &FreeSans12pt7b, ILI9341_WHITE); 
   }
   if(25200000 < time_start_to_now <= 27600000){
-    drawText(150, 130, "Heat it up to 130digC", &FreeSans12pt7b, ILI9341_WHITE);
+    drawText(150, 130, "Heat it up to 130", &FreeSans12pt7b, ILI9341_WHITE);
   }
   if(27600000 < time_start_to_now <= 34800000){
     drawText(150, 130, "Keep 130digC", &FreeSans12pt7b, ILI9341_WHITE);
@@ -383,7 +374,7 @@ int page_7(){
   if(34800000 < time_start_to_now <= 40800000){
     drawText(150, 130, "Cool it up to 30digC", &FreeSans12pt7b, ILI9341_WHITE);
   }
-  
+  */
 
 
   // 平行線(x始点，y始点，長さ)
@@ -430,17 +421,15 @@ int page_7(){
     // ボタンタッチエリア検出
     if (x >= 25 && x <= 165 && y >= 185 && y <= 235){
       page = 10;   // 範囲内ならpage10 グラフ
-      tone(0,3000,100);
+      tone(2,3000,100);
     }
     if (x >= 170 && x <= 310 && y >= 185 && y <= 235){
       page = 8; // 範囲内ならpage8 
-      tone(0,3000,100);
+      tone(2,3000,100);
     }
 
   }
-  else{
-    page_7();
-  }
+
 
   return page;
 }
@@ -488,15 +477,13 @@ int page_10(){
 
     // ボタンタッチエリア検出
     if (x >= 25 && x <= 165 && y >= 185 && y <= 235) {
-      tone(0,3000,100);
+      tone(2,3000,100);
       page = 7;
       }   // 範囲内ならpage7
 
 
   }
-  else{
-    page_10();
-  }
+
 
   return page;
 }
@@ -544,11 +531,11 @@ void loop(){
     case 6:
       delay(200);
       page_6();
+      tone(2,3000,1000);
+      time_start = millis();
       break;
     case 7:
       delay(200);
-      tone(0,3000,1500);
-      time_start = millis();
       page_7();
       break;
     case 8:

@@ -17,8 +17,11 @@ unsigned long time_start_to_now = 0;
 unsigned long hour = 0;   //桁焼き開始時刻
 unsigned long minute = 0;
 unsigned long second = 0;
+unsigned long time_remaining = 0;
+int i = 0;
 
-#define sound 0 //タッチ音
+
+#define sound 0 //ボタンタッチ音
 
 #define TFT_CS 22   // CS
 #define TFT_RST 21   // Reset 
@@ -90,7 +93,7 @@ void drawButton(int x, int y, int w, int h, const char* label, const GFXfont* fo
 }
 
 
-/******************** 2ページ目 ********************/
+/******************** 2ページ目 manual or auto********************/
 int page_2(){
   lampSignal = false;
   canvas.fillScreen(ILI9341_BLACK);   //背景色リセット
@@ -140,7 +143,7 @@ int page_2(){
   return page;
 }
 
-/******************** 3ページ目 ********************/
+/******************** 3ページ目 manual操作画面********************/
 int page_3(){
   canvas.fillScreen(ILI9341_BLACK);   //背景色リセット
   drawText(92, 30, "Heating", &FreeSans9pt7b, ILI9341_WHITE);
@@ -199,22 +202,22 @@ int page_3(){
   return page;
 }
 
-/******************** 4ページ目 ********************/
+/******************** 4ページ目 autoメニュー表示********************/
 int page_4(){
   lampSignal = false;
   canvas.fillScreen(ILI9341_BLACK);   //背景色リセット
   drawText(92, 30, "Heating", &FreeSans9pt7b, ILI9341_WHITE);
   drawText(232, 30, "Waiting", &FreeSans9pt7b, ILI9341_WHITE);
 
-  drawText(20, 80, "Heat it up to 90 degC", &FreeSans9pt7b, ILI9341_WHITE);
+  drawText(20, 80, "Heat up to 90 degC", &FreeSans9pt7b, ILI9341_WHITE);
   drawText(230, 80, "60 min", &FreeSans9pt7b, ILI9341_WHITE);
   drawText(20, 100, "Keep 90 degC", &FreeSans9pt7b, ILI9341_WHITE);
   drawText(230, 100, "360 min", &FreeSans9pt7b, ILI9341_WHITE);
-  drawText(20, 120, "Heat it up to 130 degC", &FreeSans9pt7b, ILI9341_WHITE);
+  drawText(20, 120, "Heat up to 130 degC", &FreeSans9pt7b, ILI9341_WHITE);
   drawText(230, 120, "40 min", &FreeSans9pt7b, ILI9341_WHITE);
   drawText(20, 140, "Keep 130 degC", &FreeSans9pt7b, ILI9341_WHITE);
   drawText(230, 140, "120 min", &FreeSans9pt7b, ILI9341_WHITE);
-  drawText(20, 160, "Cool it down to 30 degC", &FreeSans9pt7b, ILI9341_WHITE);
+  drawText(20, 160, "Cool down to 30 degC", &FreeSans9pt7b, ILI9341_WHITE);
   drawText(230, 160, "100 min", &FreeSans9pt7b, ILI9341_WHITE);
 
 
@@ -270,7 +273,7 @@ void page_5(){
     
 }
 
-/******************** 6ページ目 ********************/
+/******************** 6ページ目 auto桁焼きスタート最終確認********************/
 int page_6(){
   lampSignal = false;
   canvas.fillScreen(ILI9341_BLACK);   //背景色リセット
@@ -337,44 +340,49 @@ int page_7(){
   time_now = millis();
   
   time_start_to_now = time_now - time_start;
-  /*
-  canvas.setFont(&FreeSans9pt7b);  // フォント指定
-  canvas.setCursor(3, 155);          // 表示座標指定
-  canvas.print(time_start_to_now);
-  */
+  time_remaining = 40800000 - time_start_to_now;
   
   hour = time_start_to_now / 3600000;
-  minute = (time_start_to_now / 60000) - hour*60;
-  second = (time_start_to_now / 1000) - hour*60 - minute*60;
-
-
+  minute = (time_start_to_now % 3600000) / 60000;
+  second = (time_start_to_now % 60000) / 1000;
   canvas.setFont(&FreeSans9pt7b);  // フォント指定
   canvas.setCursor(3, 155);          // 表示座標指定
   canvas.print(hour);    // 
-  canvas.print(" : ");
+  canvas.print(":");
   canvas.print(minute);    // 
-  canvas.print(" ' ");
+  canvas.print("'");
+  canvas.print(second);    // 
+
+  hour = time_remaining / 3600000;
+  minute = (time_remaining % 3600000) / 60000;
+  second = (time_remaining % 60000) / 1000;
+  canvas.setFont(&FreeSans9pt7b);  // フォント指定
+  canvas.setCursor(250, 155);          // 表示座標指定
+  canvas.print(hour);    // 
+  canvas.print(":");
+  canvas.print(minute);    // 
+  canvas.print("'");
   canvas.print(second);    // 
   
 
   
-  if(0 <= time_start_to_now <= 3600000){
-    drawText(120, 130, "Heat it up to 90", &FreeSans12pt7b, ILI9341_WHITE);
+  if(0 <= time_start_to_now && time_start_to_now <= 3600000){
+    drawText(120, 130, "Heat up to 90", &FreeSans12pt7b, ILI9341_RED);
   }
-  /*
-  if(3600000 < time_start_to_now <= 25200000){
-    drawText(150, 130, "Keep 90digC", &FreeSans12pt7b, ILI9341_WHITE); 
+  
+  if(3600000 < time_start_to_now && time_start_to_now <= 25200000){
+    drawText(150, 130, "Keep 90digC", &FreeSans12pt7b, ILI9341_ORANGE); 
   }
-  if(25200000 < time_start_to_now <= 27600000){
-    drawText(150, 130, "Heat it up to 130", &FreeSans12pt7b, ILI9341_WHITE);
+  if(25200000 < time_start_to_now && time_start_to_now <= 27600000){
+    drawText(150, 130, "Heat up to 130", &FreeSans12pt7b, ILI9341_RED);
   }
-  if(27600000 < time_start_to_now <= 34800000){
-    drawText(150, 130, "Keep 130digC", &FreeSans12pt7b, ILI9341_WHITE);
+  if(27600000 < time_start_to_now && time_start_to_now <= 34800000){
+    drawText(150, 130, "Keep 130digC", &FreeSans12pt7b, ILI9341_ORANGE);
   }
-  if(34800000 < time_start_to_now <= 40800000){
-    drawText(150, 130, "Cool it up to 30digC", &FreeSans12pt7b, ILI9341_WHITE);
+  if(34800000 < time_start_to_now && time_start_to_now <= 40800000){
+    drawText(150, 130, "Cool down to 30digC", &FreeSans12pt7b, ILI9341_BLUE);
   }
-  */
+  
 
 
   // 平行線(x始点，y始点，長さ)
@@ -479,7 +487,7 @@ int page_10(){
     if (x >= 25 && x <= 165 && y >= 185 && y <= 235) {
       tone(2,3000,100);
       page = 7;
-      }   // 範囲内ならpage7
+    }   // 範囲内ならpage7
 
 
   }
@@ -531,16 +539,18 @@ void loop(){
     case 6:
       delay(200);
       page_6();
-      tone(2,3000,1000);
-      time_start = millis();
+
       break;
     case 7:
+      for(i; i < 1; i++){
+        tone(2,3000,1000);
+        time_start = millis();
+      }
       delay(200);
       page_7();
       break;
     case 8:
       delay(200);
-
       page_2();
       break;
     case 9:
@@ -558,17 +568,9 @@ void loop(){
 
     default:
       Serial.print("Page number error!!");
+      break;
 
   }
 
-
-
-
-
-
-  
-
-
-
-
 }
+

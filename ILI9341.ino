@@ -14,6 +14,10 @@ int page = 2;  //表示ページ
 unsigned long time_start = 0;   //桁焼き開始時刻
 unsigned long time_now = 0;
 unsigned long time_start_to_now = 0;
+unsigned long hour = 0;   //桁焼き開始時刻
+unsigned long minute = 0;
+unsigned long second = 0;
+
 #define sound 0 //タッチ音
 
 #define TFT_CS 22   // CS
@@ -208,15 +212,15 @@ int page_4(){
   drawText(92, 30, "Heating", &FreeSans9pt7b, ILI9341_WHITE);
   drawText(232, 30, "Waiting", &FreeSans9pt7b, ILI9341_WHITE);
 
-  drawText(20, 80, "Adjust to 90 degC", &FreeSans9pt7b, ILI9341_WHITE);
+  drawText(20, 80, "Heat it up to 90 degC", &FreeSans9pt7b, ILI9341_WHITE);
   drawText(230, 80, "60 min", &FreeSans9pt7b, ILI9341_WHITE);
   drawText(20, 100, "Keep 90 degC", &FreeSans9pt7b, ILI9341_WHITE);
   drawText(230, 100, "360 min", &FreeSans9pt7b, ILI9341_WHITE);
-  drawText(20, 120, "Adjust to 130 degC", &FreeSans9pt7b, ILI9341_WHITE);
+  drawText(20, 120, "Heat it up to 130 degC", &FreeSans9pt7b, ILI9341_WHITE);
   drawText(230, 120, "40 min", &FreeSans9pt7b, ILI9341_WHITE);
   drawText(20, 140, "Keep 130 degC", &FreeSans9pt7b, ILI9341_WHITE);
   drawText(230, 140, "120 min", &FreeSans9pt7b, ILI9341_WHITE);
-  drawText(20, 160, "Adjust to 30 degC", &FreeSans9pt7b, ILI9341_WHITE);
+  drawText(20, 160, "Cool it down to 30 degC", &FreeSans9pt7b, ILI9341_WHITE);
   drawText(230, 160, "100 min", &FreeSans9pt7b, ILI9341_WHITE);
 
 
@@ -343,18 +347,43 @@ int page_7(){
 
   time_now = millis();
 
-  time_start_to_now = (time_now - time_start);
-
+  time_start_to_now = time_now - time_start;
   /*
-  if(0 <= time_start_to_now < ){
-    drawText(150, 130, "Adjust to 90", &FreeSans12pt7b, ILI9341_WHITE);
+  if((time_start_to_now % 1000) == 0) {
+    second = time_start_to_now / 1000;
+    minute = second / 60;
+    hour = minute / 60;
+
+    canvas.setFont(&FreeSans9pt7b);  // フォント指定
+    canvas.setCursor(50, 155);          // 表示座標指定
+    canvas.print(hour);    // 経過時間をms単位で表示
+    canvas.print(":");    // 経過時間をms単位で表示
+    canvas.print(minute);    // 経過時間をms単位で表示
+    canvas.print("'");
+    canvas.print(second);    // 経過時間をms単位で表示
   }
   */
-  drawText(150, 130, "Adjust to 90", &FreeSans12pt7b, ILI9341_WHITE);
-
   canvas.setFont(&FreeSans9pt7b);  // フォント指定
   canvas.setCursor(50, 155);          // 表示座標指定
-  canvas.print(time_start_to_now);           // 経過時間をms単位で表示
+  canvas.print(time_start_to_now);    // 経過時間をms単位で表示
+
+  
+  if(0 <= time_start_to_now <= 3600000){
+    drawText(150, 130, "Heat it up to 90digC", &FreeSans12pt7b, ILI9341_WHITE);
+  }
+  if(3600000 < time_start_to_now <= 25200000){
+    drawText(150, 130, "Keep 90digC", &FreeSans12pt7b, ILI9341_WHITE); 
+  }
+  if(25200000 < time_start_to_now <= 27600000){
+    drawText(150, 130, "Heat it up to 130digC", &FreeSans12pt7b, ILI9341_WHITE);
+  }
+  if(27600000 < time_start_to_now <= 34800000){
+    drawText(150, 130, "Keep 130digC", &FreeSans12pt7b, ILI9341_WHITE);
+  }
+  if(34800000 < time_start_to_now <= 40800000){
+    drawText(150, 130, "Cool it up to 30digC", &FreeSans12pt7b, ILI9341_WHITE);
+  }
+  
 
 
   // 平行線(x始点，y始点，長さ)
@@ -400,18 +429,17 @@ int page_7(){
 
     // ボタンタッチエリア検出
     if (x >= 25 && x <= 165 && y >= 185 && y <= 235){
-      page = 10;   // 範囲内ならpage10
+      page = 10;   // 範囲内ならpage10 グラフ
       tone(0,3000,100);
     }
     if (x >= 170 && x <= 310 && y >= 185 && y <= 235){
-      page = 8; // 範囲内ならpage8
+      page = 8; // 範囲内ならpage8 
       tone(0,3000,100);
     }
 
   }
   else{
     page_7();
-
   }
 
   return page;
@@ -444,7 +472,7 @@ int page_10(){
   updateLamp_on(); // ボタン点灯状態更新関数呼び出し
 
   // ボタン描画（左上x, 左上y, wide, high, ラベル, フォント, ボタン色, ラベル色）
-  drawButton(25, 185, 140, 50, "Back", &FreeSans18pt7b, ILI9341_ORANGE, ILI9341_WHITE); // page7に戻る
+  drawButton(25, 185, 140, 50, "Cancel", &FreeSans18pt7b, ILI9341_ORANGE, ILI9341_WHITE); // page7に戻る
 
 
   //スプライトをディスプレイ表示

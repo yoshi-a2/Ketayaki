@@ -546,12 +546,14 @@ void loop(){
       page_6();
       break;
     case 7:
-      time_start = millis();
       delay(200);
+      tone(0,3000,1500);
+      time_start = millis();
       page_7();
       break;
     case 8:
       delay(200);
+
       page_2();
       break;
     case 9:
